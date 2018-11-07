@@ -125,7 +125,12 @@ export class IpcBusBrokerImpl implements Broker.IpcBusBroker, IpcBusBrokerSocket
             }
         });
 
-        this._ipcBusBrokerClient = new IpcBusClientTransportNode(processType, { port: this._netOptions.port, host: this._netOptions.host, path: this._netOptions.path });
+        if (this._netOptions.path) {
+            this._ipcBusBrokerClient = new IpcBusClientTransportNode(processType, { path: this._netOptions.path });
+        }
+        else {
+            this._ipcBusBrokerClient = new IpcBusClientTransportNode(processType, { port: this._netOptions.port, host: this._netOptions.host });
+        }
     }
 
     private _reset() {
@@ -184,7 +189,7 @@ export class IpcBusBrokerImpl implements Broker.IpcBusBroker, IpcBusBrokerSocket
                     fctReject(msg);
                 };
 
-                let catchListening =  (_server: any) => {
+                let catchListening = (_server: any) => {
                     clearTimeout(timer);
                     server.removeListener('listening', catchListening);
                     server.removeListener('error', catchError);
@@ -224,7 +229,12 @@ export class IpcBusBrokerImpl implements Broker.IpcBusBroker, IpcBusBrokerSocket
                 server.addListener('listening', catchListening);
                 server.addListener('error', catchError);
                 server.addListener('close', catchClose);
-                server.listen({ port: this._netOptions.port, host: this._netOptions.host, path: this._netOptions.path });
+                if (this._netOptions.path) {
+                    server.listen({ path: this._netOptions.path });
+                }
+                else {
+                    server.listen({ port: this._netOptions.port, host: this._netOptions.host });
+                }
             });
         }
         return p;
